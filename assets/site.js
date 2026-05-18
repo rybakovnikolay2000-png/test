@@ -380,13 +380,37 @@ function syncAvailableLanguages(config) {
   });
 }
 
+function normalizePageSlug(pageId = "home", slug = "") {
+  const cleaned = String(slug || "").trim().replace(/^\/+|\/+$/g, "");
+  if (pageId === "home") {
+    return "";
+  }
+  return cleaned || pageId;
+}
+
+function normalizeBaseUrlValue(value = "") {
+  const cleaned = String(value || "").trim();
+  if (!cleaned) {
+    return "";
+  }
+  const candidate = /^https?:\/\//i.test(cleaned) ? cleaned : `https://${cleaned}`;
+  try {
+    const parsed = new URL(candidate);
+    const pathname = parsed.pathname.replace(/\/+$/, "");
+    return `${parsed.origin}${pathname}`;
+  } catch {
+    return candidate.replace(/\/+$/, "");
+  }
+}
+
 function getPagePath(pageId = builderState.pageId, localeCode = builderState.localeCode) {
   const page = builderState.config.pages.find((entry) => entry.id === pageId);
   const content =
     page?.locales?.[localeCode] ||
     page?.locales?.[builderState.config.site.defaultLocale] ||
     null;
-  return content?.slug ? `/${localeCode}/${content.slug}/` : `/${localeCode}/`;
+  const slug = normalizePageSlug(pageId, content?.slug || "");
+  return slug ? `/${localeCode}/${slug}/` : `/${localeCode}/`;
 }
 
 function ensureLocaleShape(config) {
@@ -1046,7 +1070,7 @@ function refreshTopFields() {
   builderState.fields.pageTitle.value = content?.title || "";
   builderState.fields.pageDescription.value = content?.description || "";
   builderState.fields.pageKeywords.value = content?.keywords || "";
-  builderState.fields.pageSlug.value = content?.slug || "";
+  builderState.fields.pageSlug.value = normalizePageSlug(builderState.pageId, content?.slug || "");
   builderState.fields.pageCanonical.value = content?.canonical || "";
   builderState.fields.localeLabel.value = locale?.label || "";
   builderState.fields.localeNativeLabel.value = locale?.nativeLabel || "";
@@ -1082,7 +1106,8 @@ function bindTopFields() {
   });
 
   bind(builderState.fields.baseUrl, (value) => {
-    builderState.config.site.baseUrl = value.trim();
+    builderState.config.site.baseUrl = normalizeBaseUrlValue(value);
+    builderState.fields.baseUrl.value = builderState.config.site.baseUrl;
   });
 
   bind(builderState.fields.pageTitle, (value) => {
@@ -1102,7 +1127,7 @@ function bindTopFields() {
 
   bind(builderState.fields.pageSlug, (value) => {
     const content = getCurrentContent();
-    content.slug = value.trim();
+    content.slug = normalizePageSlug(builderState.pageId, value);
   });
 
   bind(builderState.fields.pageCanonical, (value) => {
@@ -1268,13 +1293,13 @@ function createBuilderShell() {
         <div class="builder-actions-row">
           <button type="button" class="builder-ghost-btn" id="builderAddLanguage">Languages</button>
         </div>
-        <p class="builder-helper">Use this panel for saving, canonical, slug, meta, redirects, and language management.</p>
+        <p class="builder-helper">Use this panel for domain, slug, meta, redirects, export, and language management. In most cases, only Base URL matters.</p>
       </div>
 
       <div class="builder-panel__section builder-settings">
         <div class="builder-section__head">
           <h4>SEO and page data</h4>
-          <p>These fields are technical and affect indexing, sharing, and routing.</p>
+          <p>Set Base URL once, for example <code>https://test.org</code> or <code>https://user.github.io/test</code>. Leave Canonical empty to auto-generate it.</p>
         </div>
         <div class="builder-inline-grid">
           <label>
