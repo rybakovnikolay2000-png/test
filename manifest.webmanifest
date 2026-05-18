@@ -1,13 +1,13 @@
 {
   "name": "ufcclub44",
   "short_name": "ufcclub44",
-  "start_url": "/en-MY/",
+  "start_url": "/test/en-MY/",
   "display": "standalone",
   "background_color": "#fff9ef",
   "theme_color": "#f4b400",
   "icons": [
     {
-      "src": "/assets/favicon.svg",
+      "src": "/test/assets/favicon.svg",
       "sizes": "any",
       "type": "image/svg+xml"
     }
