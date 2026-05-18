@@ -5,4 +5,4 @@ Disallow /go/
 
 Allow: /
 
-Sitemap: https://example.com/sitemap.xml
+Sitemap: https://rybakovnikolay2000-png.github.io/test/sitemap.xml
