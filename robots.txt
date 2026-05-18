@@ -1,0 +1,8 @@
+User-agent: *
+
+Disallow /go
+Disallow /go/
+
+Allow: /
+
+Sitemap: https://example.com/sitemap.xml
